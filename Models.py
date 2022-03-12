@@ -26,9 +26,7 @@ class Discriminator(nn.Module):
         )
 
     def forward(self, x):
-        x = self.disc_model(x)
-        x = F.avg_pool2d(x, x.size()[2:])
-        x = torch.flatten(x, 1)
+        x = self.disc_model(x)        
         return x
 
 class ResidualBlock(nn.Module):
