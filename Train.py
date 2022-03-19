@@ -43,15 +43,15 @@ DATALOADER_WORKER = 1
 SHUFFLE_DATASET = True
 IMG_SIZE = 256
 NGPU = 4
-NUM_EPOCHS = 1000
+NUM_EPOCHS = 10000
 lr = 2e-4
 save_key = "real_image"
 folder_key = "3"
 beta1 = 0.5
 is_resume = True
-resume_path_gen = "/common/home/ssa162/CS536/Project1/weights/3/real_image/gen/gen_epoch_269.pth"
-resume_path_disc = "/common/home/ssa162/CS536/Project1/weights/3/real_image/disc/disc_epoch_269.pth"
-starting_epoch = 269
+resume_path_gen = "/common/home/ssa162/CS536/Project1/weights/3/real_image/gen/gen_epoch_319.pth"
+resume_path_disc = "/common/home/ssa162/CS536/Project1/weights/3/real_image/disc/disc_epoch_319.pth"
+starting_epoch = 319
 
 save_folders = [f"weights/{folder_key}/{save_key}/gen/",f"weights/{folder_key}/{save_key}/disc/"]
 for dir in save_folders:
