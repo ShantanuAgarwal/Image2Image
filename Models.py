@@ -53,16 +53,17 @@ class Generator(nn.Module):
         self.gen_model = nn.Sequential(
             
             nn.ReflectionPad2d(3),
-            nn.Conv2d(3, 64, 7),
+            nn.Conv2d(3, 64, 7,stride = 1),
             nn.InstanceNorm2d(64),
             nn.ReLU(inplace=True),
 
             
-            nn.Conv2d(64, 128, 3, stride=2, padding=1),
-            nn.InstanceNorm2d(128),
+            nn.Conv2d(64, 128, 3, stride=2, padding=1,bias=False),
+            nn.InstanceNorm2d(128,affine=True),
             nn.ReLU(inplace=True),
-            nn.Conv2d(128, 256, 3, stride=2, padding=1),
-            nn.InstanceNorm2d(256),
+
+            nn.Conv2d(128, 256, 3, stride=2, padding=1,bias=False),
+            nn.InstanceNorm2d(256,affine=True),
             nn.ReLU(inplace=True),
             
             ResidualBlock(256),
@@ -84,7 +85,7 @@ class Generator(nn.Module):
             nn.ReLU(inplace=True),
 
             nn.ReflectionPad2d(3),
-            nn.Conv2d(64, 3, 7),
+            nn.Conv2d(64, 3, 7, stride=1,padding=0, bias=False),
             nn.Tanh()
         )
 

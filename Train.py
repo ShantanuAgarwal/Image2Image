@@ -38,7 +38,7 @@ def weights_init(m):
 manualSeed = 999
 random.seed(manualSeed)
 torch.manual_seed(manualSeed)
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 DATALOADER_WORKER = 1
 SHUFFLE_DATASET = True
 IMG_SIZE = 256
@@ -46,12 +46,12 @@ NGPU = 4
 NUM_EPOCHS = 10000
 lr = 2e-4
 save_key = "real_image"
-folder_key = "3"
+folder_key = "5"
 beta1 = 0.5
-is_resume = True
-resume_path_gen = "/common/home/ssa162/CS536/Project1/weights/3/real_image/gen/gen_epoch_319.pth"
-resume_path_disc = "/common/home/ssa162/CS536/Project1/weights/3/real_image/disc/disc_epoch_319.pth"
-starting_epoch = 319
+is_resume = False
+resume_path_gen = "/common/home/ssa162/CS536/Project1/weights/4/real_image/gen/gen_epoch_11.pth"
+resume_path_disc = "/common/home/ssa162/CS536/Project1/weights/4/real_image/disc/disc_epoch_11.pth"
+starting_epoch = 0
 
 save_folders = [f"weights/{folder_key}/{save_key}/gen/",f"weights/{folder_key}/{save_key}/disc/"]
 for dir in save_folders:
@@ -111,28 +111,27 @@ for epoch in range(starting_epoch+1,NUM_EPOCHS):
         b_size = real_img.size(0)
         real_label = torch.full((b_size, 1,30,30), 1, device=device, dtype=torch.float32)
         fake_label = torch.full((b_size, 1,30,30), 0, device=device, dtype=torch.float32)
+        noise = torch.randn(b_size, 3, 256, 256, device=device)       
         
-        optimizer_gen.zero_grad()
-        # Generate batch of latent vectors
-        noise = torch.randn(b_size, 3, 256, 256, device=device)
-        # Generate fake image batch with G
-        fake_img = gen(noise)
-        fake_g_output = disc(fake_img)
-        loss_g = criterion(fake_g_output,real_label)
-        loss_g.backward()
-        optimizer_gen.step()
         
+        # Train the discriminator
         optimizer_disc.zero_grad()
         real_d_output = disc(real_img)
         loss_d_real = criterion(real_d_output,real_label)
-        noise_d = torch.randn(b_size, 3, 256, 256, device=device)
-        fake_d_output = disc(gen(noise_d).detach())
+        fake_d_output = disc(gen(noise).detach())
         loss_d_fake = criterion(fake_d_output,fake_label)
         
         loss_d = (loss_d_real+loss_d_fake)/2
         loss_d.backward()
         optimizer_disc.step()
 
+        # Train the generator
+        optimizer_gen.zero_grad()
+        fake_img = gen(noise)
+        fake_g_output = disc(fake_img)
+        loss_g = criterion(fake_g_output,real_label)
+        loss_g.backward()
+        optimizer_gen.step()
         #Output training stats
         if i % 10 == 0:
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\t'
@@ -148,9 +147,10 @@ for epoch in range(starting_epoch+1,NUM_EPOCHS):
         fake = gen(fixed_noise).detach().cpu()
     img_grid = vutils.make_grid(fake, padding=2, normalize=True)
     img_list.append(img_grid)
-    torchvision.utils.save_image(img_grid,f"weights/{folder_key}/{save_key}/gen/img_epoch_{epoch+1}.png")
-    torch.save(gen.state_dict(), f"weights/{folder_key}/{save_key}/gen/gen_epoch_{epoch+1}.pth")
-    torch.save(disc.state_dict(), f"weights/{folder_key}/{save_key}/disc/disc_epoch_{epoch+1}.pth")
+    if epoch % 10 == 0:        
+        torchvision.utils.save_image(img_grid,f"weights/{folder_key}/{save_key}/gen/img_epoch_{epoch+1}.png")
+        torch.save(gen.state_dict(), f"weights/{folder_key}/{save_key}/gen/gen_epoch_{epoch+1}.pth")
+        torch.save(disc.state_dict(), f"weights/{folder_key}/{save_key}/disc/disc_epoch_{epoch+1}.pth")
 
 torch.save(gen.state_dict(), f"weights/{folder_key}/{save_key}/gen/gen_final.pth")
 torch.save(disc.state_dict(), f"weights/{folder_key}/{save_key}/disc/disc_epoch_final.pth")
